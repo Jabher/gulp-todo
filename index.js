@@ -1,14 +1,13 @@
 'use strict';
 var gutil = require('gulp-util');
 var through = require('through2');
-var esprima = require('esprima');
 var path = require('path');
 
 //test for comments that have todo/fixme + text
-var rCommentsValidator = /^(\W)*(TODO|FIXME)+(?:\s)*?(?:\S)+/i;
+var rCommentsValidator = /(?:(?:\/\/)|\#)[-–—]*\s*(TODO|FIXME)\s*(.*)$/igm;
+
 //split todo/fixme comments
 var rCommentsSplit = /(TODO|FIXME):?/i;
-
 /**
  * generateContents
  * generates the markdown output
@@ -51,15 +50,13 @@ var generateContents = function (comments, newLine) {
  */
 //TODO export a to a lib
 var mapCommentObject = function (comment) {
-    //get splitted comment
-    var _splitted = comment.value.trim().split(rCommentsSplit);
     //get relative file name
     var _path = this.path || 'unknown file';
     var _file = _path.replace(this.cwd + path.sep, '');
     //get comment text
-    var _text = _splitted[2].trim();
+    var _text = comment.value.trim();
     //get comment kind
-    var _kind = _splitted[1].trim().toUpperCase();
+    var _kind = comment.type.trim().toUpperCase();
     //get comment line
     var _line = comment.line;
 
@@ -81,33 +78,10 @@ var mapCommentObject = function (comment) {
  * @return
  */
 var getCommentsFromAst = function (ast, file) {
-    var comments = [];
-
     //fail safe return
-    if (!ast || !ast.comments || !ast.comments.length) {
-        return comments;
-    }
+    if (!ast || !ast.comments || !ast.comments.length) return [];
 
-    ast.comments.forEach(function (comment) {
-        var splittedComment = comment.value.split('\n');
-        var results = splittedComment.filter(function (item) {
-            return rCommentsValidator.test(item);
-        });
-        if (results && results.length) {
-            results = results.map(function (i) {
-                return {
-                    value: i,
-                    line: comment.loc.start.line
-                };
-            });
-            comments = comments.concat(results);
-        }
-    });
-    if (!comments || !comments.length) {
-        return [];
-    }
-
-    return comments.map(mapCommentObject, file);
+    return ast.comments.map(mapCommentObject, file);
 };
 
 module.exports = function (params) {
@@ -136,11 +110,19 @@ module.exports = function (params) {
             var ast;
 
             try {
-                ast = esprima.parse(file.contents.toString('utf8'), {
-                    tolerant: true,
-                    comment: true,
-                    loc: true
-                });
+                var content = file.contents.toString('utf8');
+                ast = {};
+                ast.comments = [];
+                content.split('\n').forEach(function(line, index){
+                    rCommentsValidator.lastIndex = 0;    
+                    var commentString = rCommentsValidator.exec(content);
+                    if (commentString) ast.comments.push({
+                        type: commentString[1],
+                        text: commentString[2],
+                        line: index
+                    })
+                })
+                
             } catch (err) {
                 err.message = 'gulp-todo: ' + err.message;
                 this.emit('error', new gutil.PluginError('gulp-todo', err));
