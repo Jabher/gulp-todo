@@ -6,7 +6,7 @@
 [![Dependencies](http://img.shields.io/gemnasium/pgilad/gulp-todo.svg)](https://gemnasium.com/pgilad/gulp-todo)
 [![Build Status](https://travis-ci.org/pgilad/gulp-todo.svg?branch=master)](https://travis-ci.org/pgilad/gulp-todo)
 
-Parse all your javascript files through Esprima, and generate a todo.md
+Parse all your files, and generate a todo.md
 
 ## Install
 
