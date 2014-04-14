@@ -8,6 +8,24 @@ var rCommentsValidator = /(?:(?:\/\/)|\#)[-–—]*\s*(TODO|FIXME)\s*(.*)$/igm;
 
 //split todo/fixme comments
 var rCommentsSplit = /(TODO|FIXME):?/i;
+
+Object.defineProperties(Array.prototype, {
+    contains: {value: function (v) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] === v) return true;
+        }
+        return false;
+    }},
+    unique: {value: function () {
+        var arr = [];
+        for (var i = 0; i < this.length; i++) {
+            if (!arr.contains(this[i])) {
+                arr.push(this[i]);
+            }
+        }
+        return arr;
+    }}
+})
 /**
  * generateContents
  * generates the markdown output
@@ -18,29 +36,36 @@ var rCommentsSplit = /(TODO|FIXME):?/i;
  * @return
  */
 var generateContents = function (comments, newLine) {
-    var output = {
-        TODO: '',
-        FIXME: ''
-    };
+    var contents = [];
+    return Object.getOwnPropertyNames(comments).map(function (key) {
+        var fileRecord = '',
+            fileComments = comments[key];
+        if (!fileComments) return;
+        fileRecord += '## File: ' + key;
+        fileRecord += newLine;
+        fileRecord += ['TODO', 'FIXME'].map(function (kind) {
 
-    comments.forEach(function (comment) {
-        output[comment.kind] += '| ' + comment.file + ' | ' + comment.line + ' | ' + comment.text + newLine;
-    });
+            var kindComments = fileComments.filter(function (comment) {
+                return comment.kind === kind;
+            });
+            if (!kindComments.length) return null;
+            return {
+                kind: kind,
+                comments: kindComments
+            }
+        })
+            .filter(function (a) {
+                return a;
+            })
+            .map(function (kind) {
+                return '###' + kind.kind + 's' + newLine + kind.comments.map(function (comment) {
+                    return '+ ' + comment.text + ' @line ' + comment.line
+                }).join(newLine)
+            }).join(newLine);
+        return fileRecord;
+    }).join(newLine + newLine);
 
-    var contents;
-
-    contents = '### TODOs' + newLine;
-    contents += '| Filename | line # | todo' + newLine;
-    contents += '|:--------:|:------:|:------:' + newLine;
-    contents += output.TODO + newLine + newLine;
-
-    contents += '### FIXMEs' + newLine;
-    contents += '| Filename | line # | fixme' + newLine;
-    contents += '|:--------:|:------:|:------:' + newLine;
-    contents += output.FIXME;
-
-    return contents;
-};
+}
 
 /**
  * mapCommentObject
@@ -50,9 +75,6 @@ var generateContents = function (comments, newLine) {
  */
 //TODO export a to a lib
 var mapCommentObject = function (comment) {
-    //get relative file name
-    var _path = this.path || 'unknown file';
-    var _file = _path.replace(this.cwd + path.sep, '');
     //get comment text
     var _text = comment.value.trim();
     //get comment kind
@@ -61,7 +83,6 @@ var mapCommentObject = function (comment) {
     var _line = comment.line;
 
     return {
-        file: _file,
         text: _text,
         kind: _kind,
         line: _line
@@ -79,9 +100,14 @@ var mapCommentObject = function (comment) {
  */
 var getCommentsFromAst = function (ast, file) {
     //fail safe return
-    if (!ast || !ast.comments || !ast.comments.length) return [];
+    if (!ast || !ast.length) return [];
+    var _path = file.path || 'unknown file';
+    var _file = _path.replace(file.cwd + path.sep, '');
 
-    return ast.comments.map(mapCommentObject, file);
+    return {
+        comments: ast.map(mapCommentObject),
+        file: _file
+    }
 };
 
 module.exports = function (params) {
@@ -92,7 +118,7 @@ module.exports = function (params) {
     var firstFile;
     //newline separator
     var newLine = params.newLine || gutil.linefeed;
-    var comments = [];
+    var comments = {};
 
     /* main object iteration */
     return through.obj(function (file, enc, cb) {
@@ -111,48 +137,43 @@ module.exports = function (params) {
 
             try {
                 var content = file.contents.toString('utf8');
-                ast = {};
-                ast.comments = [];
-                content.split('\n').forEach(function(line, index){
-                    rCommentsValidator.lastIndex = 0;    
-                    var commentString = rCommentsValidator.exec(content);
-                    if (commentString) ast.comments.push({
+                ast = [];
+                content.split('\n').forEach(function (line, index) {
+                    rCommentsValidator.lastIndex = 0;
+                    var commentString = rCommentsValidator.exec(line);
+                    if (commentString) ast.push({
                         type: commentString[1],
-                        text: commentString[2],
+                        value: commentString[2],
                         line: index
                     })
                 })
-                
+
             } catch (err) {
                 err.message = 'gulp-todo: ' + err.message;
                 this.emit('error', new gutil.PluginError('gulp-todo', err));
             }
 
             //assign first file to get relative cwd/path
-            if (!firstFile) {
-                firstFile = file;
-            }
+            if (!firstFile) firstFile = file;
 
-            //todo better rename
-            comments = comments.concat(getCommentsFromAst(ast, file));
+
+            var fileComments = getCommentsFromAst(ast, file);
+            comments[fileComments.file] = fileComments.comments;
 
             return cb();
         },
         function (cb) {
-            if (!firstFile || !comments.length) {
-                return cb();
-            }
+            if (!firstFile) return cb();
 
-            //get generated output
-            var contents = generateContents(comments, newLine);
+
             //build stream file
             var mdFile = new gutil.File({
                 cwd: firstFile.cwd,
                 base: firstFile.cwd,
                 path: path.join(firstFile.cwd, fileName),
-                contents: new Buffer(contents)
+                contents: new Buffer(generateContents(comments, newLine))
             });
-
+            comments = {};
             //push file
             this.push(mdFile);
             return cb();
