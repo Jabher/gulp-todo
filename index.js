@@ -40,12 +40,16 @@ module.exports = function (params) {
                         type: commentString[1].toUpperCase(),
                         value: commentString[2].trim()
                     })
-                }).filter(function(a){return a}).forEach(function(record){
-                    fileCommentsObject[record.line] = record.type + ': ' + record.value;
+                }).filter(function (a) {
+                    return a;
                 });
-
-                var key = file.path.replace(file.cwd + path.sep, '');
-                if (fileComments.length) comments[key] = fileCommentsObject;
+                if (fileComments.length) {
+                    fileComments.forEach(function (record) {
+                        fileCommentsObject[record.line] = record.type + ': ' + record.value;
+                    });
+                    var key = file.path.replace(file.cwd + path.sep, '');
+                    comments[key] = fileCommentsObject;
+                }
             } catch (err) {
                 err.message = 'gulp-todo: ' + err.message;
                 this.emit('error', new gutil.PluginError('gulp-todo', err));
@@ -53,7 +57,6 @@ module.exports = function (params) {
 
             //assign first file to get relative cwd/path
             if (!firstFile) firstFile = file;
-
 
 
             return cb();
