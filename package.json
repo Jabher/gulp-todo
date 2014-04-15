@@ -1,12 +1,12 @@
 {
   "name": "gulp-todo",
   "version": "0.1.8",
-  "description": "Generate a TODO.md file from your javascript todos and fixmes",
+  "description": "Generate a TODO.md file from all your project files TODOs and FIXMEs",
   "license": "MIT",
   "repository": "pgilad/gulp-todo",
   "author": {
-    "name": "Gilad Peleg",
-    "email": "giladp007@gmail.com"
+    "name": "Vsevolod Rodionov",
+    "email": "crbrus@gmail.com"
   },
   "engines": {
     "node": ">=0.10.0"
@@ -25,15 +25,10 @@
     "comments",
     "todo",
     "list",
-    "esprima",
-    "parse",
-    "esprima",
-    "ast",
     "source",
     "code"
   ],
   "dependencies": {
-    "esprima": "^1.1.1",
     "gulp-util": "~2.2.12",
     "through2": "~0.4.0"
   },

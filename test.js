@@ -31,7 +31,7 @@ it('should parse a file with comments correctly', function (cb) {
     var stream = todo();
 
     stream.on('data', function (file) {
-        var _filename = path.basename(file.path)
+        var _filename = path.basename(file.path);
         assert.equal(_filename, 'todo.md');
         assert.ok(/export to a lib/.test(file._contents.toString()));
         assert.ok(/unknown file/.test(file._contents.toString()));
