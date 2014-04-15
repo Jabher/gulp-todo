@@ -31,7 +31,7 @@ module.exports = function (params) {
 
             try {
                 var content = file.contents.toString(enc);
-
+                var fileCommentsObject = {};
                 var fileComments = content.split('\n').map(function (line, index) {
                     rCommentsValidator.lastIndex = 0;
                     var commentString = rCommentsValidator.exec(line);
@@ -40,9 +40,12 @@ module.exports = function (params) {
                         type: commentString[1].toUpperCase(),
                         value: commentString[2].trim()
                     })
-                }).filter(function(a){return a});
+                }).filter(function(a){return a}).forEach(function(record){
+                    fileCommentsObject[record.line] = record.type + ': ' + record.value;
+                });
+
                 var key = file.path.replace(file.cwd + path.sep, '');
-                if (fileComments.length) comments[key] = fileComments;
+                if (fileComments.length) comments[key] = fileCommentsObject;
             } catch (err) {
                 err.message = 'gulp-todo: ' + err.message;
                 this.emit('error', new gutil.PluginError('gulp-todo', err));
