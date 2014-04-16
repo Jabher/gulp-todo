@@ -1,8 +1,8 @@
 # [gulp](https://github.com/wearefractal/gulp)-every-todo
 > Generate a TODO.md file from **ALL** your project todos and fixmes
 
-[![NPM Version](http://img.shields.io/npm/v/gulp-todo.svg)](https://npmjs.org/package/gulp-every-todo)
-[![NPM Downloads](http://img.shields.io/npm/dm/gulp-todo.svg)](https://npmjs.org/package/gulp-every-todo)
+[![NPM Version](http://img.shields.io/npm/v/gulp-every-todo.svg)](https://npmjs.org/package/gulp-every-todo)
+[![NPM Downloads](http://img.shields.io/npm/dm/gulp-every-todo.svg)](https://npmjs.org/package/gulp-every-todo)
 [![Dependencies](http://img.shields.io/gemnasium/Jabher/gulp-todo.svg)](https://gemnasium.com/Jabher/gulp-todo)
 [![Build Status](http://img.shields.io/travis/Jabher/gulp-todo.svg)](https://travis-ci.org/Jabher/gulp-todo)
 
