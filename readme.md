@@ -1,19 +1,19 @@
-# [gulp](https://github.com/wearefractal/gulp)-todo
-> Generate a TODO.md file from your javascript todos and fixmes
+# [gulp](https://github.com/wearefractal/gulp)-every-todo
+> Generate a TODO.md file from **ALL** your project todos and fixmes
 
-[![NPM Version](http://img.shields.io/npm/v/gulp-todo.svg)](https://npmjs.org/package/gulp-todo)
-[![NPM Downloads](http://img.shields.io/npm/dm/gulp-todo.svg)](https://npmjs.org/package/gulp-todo)
-[![Dependencies](http://img.shields.io/gemnasium/pgilad/gulp-todo.svg)](https://gemnasium.com/pgilad/gulp-todo)
-[![Build Status](https://travis-ci.org/pgilad/gulp-todo.svg?branch=master)](https://travis-ci.org/pgilad/gulp-todo)
+[![NPM Version](http://img.shields.io/npm/v/gulp-todo.svg)](https://npmjs.org/package/gulp-every-todo)
+[![NPM Downloads](http://img.shields.io/npm/dm/gulp-todo.svg)](https://npmjs.org/package/gulp-every-todo)
+[![Dependencies](http://img.shields.io/gemnasium/Jabher/gulp-todo.svg)](https://gemnasium.com/Jabher/gulp-todo)
+[![Build Status](http://img.shields.io/travis/Jabher/gulp-todo.svg)](https://travis-ci.org/Jabher/gulp-todo)
 
 Parse all your files, and generate a todo.md
 
 ## Install
 
-Install with [npm](https://npmjs.org/package/gulp-todo)
+Install with [npm](https://npmjs.org/package/gulp-every-todo)
 
 ```
-npm install --save-dev gulp-todo
+npm install --save-dev gulp-every-todo
 ```
 
 ## Example
@@ -33,25 +33,46 @@ gulp.task('default', function() {
 
 Options can be passed along as an object containing the following fields:
 
-#### filename
+#### formatter
 
-`{String}` - specify the output filename. defaults to `todo.md`.
+`{String}` - specify the formatter type. defaults to `human`.
+Available options:
++ `human` ()
++ `robot`
 
-#### newLine
-
-`{String}` - how to seperate lines in the output file. Defaults to your OS's default line separator (usually `\n`)
-
-### Example Options using defaults:
+### Example human output:
 
 ```js
-//...
-.pipe(todo({
-    fileName: 'todo.md',
-    newLine: '\n'
-}))
-//...
+{
+    "test/file0.js": {
+        "line 0": "TODO: test"
+    },
+    "test/file1.js": {
+        "line 0": "TODO: test"
+    }
+}
+```
+### Example robot output:
+
+```js
+{
+    "test/file0.js": [
+        {
+            "line": 0,
+            "type": "TODO",
+            "value": "test"
+        }
+    ],
+    "test/file1.js": [
+        {
+            "line": 0,
+            "type": "TODO",
+            "value": "test"
+        }
+    ]
+}
 ```
 
 ## License
 
-MIT ©2014 **Gilad Peleg**
+MIT ©2014 **Vsevolod Rodionov**

@@ -1,9 +1,9 @@
 {
-  "name": "gulp-todo",
-  "version": "0.1.8",
+  "name": "gulp-every-todo",
+  "version": "0.1.0",
   "description": "Generate a TODO.md file from all your project files TODOs and FIXMEs",
   "license": "MIT",
-  "repository": "pgilad/gulp-todo",
+  "repository": "Jabher/gulp-todo",
   "author": {
     "name": "Vsevolod Rodionov",
     "email": "crbrus@gmail.com"
@@ -12,28 +12,24 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "mocha"
+    "prepublish": "npm test",
+    "test": "./node_modules/.bin/mocha tests"
   },
-  "files": [
-    "index.js"
-  ],
+  "main": "index.js",
   "keywords": [
     "gulpplugin",
     "gulp",
-    "js",
-    "javascript",
     "comments",
     "todo",
-    "list",
-    "source",
-    "code"
+    "fixme",
+    "builder"
   ],
   "dependencies": {
-    "gulp-util": "~2.2.12",
-    "through2": "~0.4.0"
+    "gulp-util": "^2.2.14",
+    "through2": "^0.4.1"
   },
   "devDependencies": {
-    "gulp": "^3.6.0",
-    "mocha": "*"
+    "mocha": "^1.18.2",
+    "should": "^3.3.1"
   }
 }

@@ -1,80 +1,44 @@
 'use strict';
-var gutil = require('gulp-util');
-var through = require('through2');
-var path = require('path');
-
-//test for comments that have todo/fixme + text
-var rCommentsValidator = /(?:(?:\/\/)|\#)[-–—]*\s*(TODO|FIXME)\s*(.*)$/igm;
+var gutil = require('gulp-util'),
+    through = require('through2'),
+    path = require('path'),
+    File = gutil.File,
+    Buffer = require('buffer').Buffer,
+    formatters = require('./lib/formatters'),
+    commentsExtractor = require('./lib/commentsExtractor');
 
 module.exports = function (params) {
     params = params || {};
-    //target filename
-    var fileName = params.fileName || 'todo.json';
-    //first file to capture cwd
-    var firstFile,
+    var formatter = formatters[params.formatter] || formatters.default,
+        fileName = params.fileName || 'todo.json', //target filename
+        firstFile = null, //first file to capture cwd
         comments = {};
 
-    /* main object iteration */
-    return through.obj(function (file, enc, cb) {
-            if (file.isNull()) {
-                //if file is null
-                this.push(file);
-                return cb();
-            }
+    function parseContent(file, enc, cb) {
+        if (file.isNull()) return cb();
+        if (file.isStream()) return this.emit('error', new gutil.PluginError('gulp-todo', 'Streaming not supported'));
+        if (!firstFile) firstFile = file;
 
-            if (file.isStream()) {
-                this.emit('error', new gutil.PluginError('gulp-todo', 'Streaming not supported'));
-                return cb();
-            }
+        var fileComments = commentsExtractor(file, enc);
+        if (fileComments.length) comments[file.path.replace(file.cwd + path.sep, '')] = formatter(fileComments);
 
-            var ast;
+        cb();
+    }
 
-            try {
-                var content = file.contents.toString(enc);
-                var fileCommentsObject = {};
-                var fileComments = content.split('\n').map(function (line, index) {
-                    rCommentsValidator.lastIndex = 0;
-                    var commentString = rCommentsValidator.exec(line);
-                    if (commentString) return ({
-                        line: index,
-                        type: commentString[1].toUpperCase(),
-                        value: commentString[2].trim()
-                    })
-                }).filter(function (a) {
-                    return a;
-                });
-                if (fileComments.length) {
-                    fileComments.forEach(function (record) {
-                        fileCommentsObject[record.line] = record.type + ': ' + record.value;
-                    });
-                    var key = file.path.replace(file.cwd + path.sep, '');
-                    comments[key] = fileCommentsObject;
-                }
-            } catch (err) {
-                err.message = 'gulp-todo: ' + err.message;
-                this.emit('error', new gutil.PluginError('gulp-todo', err));
-            }
+    function endStream() {
+        //build stream file
+        var contents = new Buffer(JSON.stringify(comments, null, 4));
 
-            //assign first file to get relative cwd/path
-            if (!firstFile) firstFile = file;
-
-
-            return cb();
-        },
-        function (cb) {
-            if (!firstFile) return cb();
-
-            //build stream file
-            var mdFile = new gutil.File({
-                cwd: firstFile.cwd,
-                base: firstFile.cwd,
-                path: path.join(firstFile.cwd, fileName),
-                contents: new Buffer(JSON.stringify(comments, null, 4))
-            });
-
-            comments = {};
-            //push file
-            this.push(mdFile);
-            return cb();
+        var outFile = new File({
+            cwd: firstFile.cwd,
+            base: firstFile.cwd,
+            path: path.join(firstFile.cwd, fileName),
+            contents: contents
         });
+
+        this.emit('data', outFile);
+        this.emit('end');
+    }
+
+    return through.obj(parseContent, endStream);
 };
