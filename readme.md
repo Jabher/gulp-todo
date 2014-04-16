@@ -1,26 +1,26 @@
 # [gulp](https://github.com/wearefractal/gulp)-every-todo
 > Generate a TODO.md file from **ALL** your project todos and fixmes
 
-[![NPM Version](http://img.shields.io/npm/v/gulp-every-todo.svg)](https://npmjs.org/package/gulp-every-todo)
-[![NPM Downloads](http://img.shields.io/npm/dm/gulp-every-todo.svg)](https://npmjs.org/package/gulp-every-todo)
-[![Dependencies](http://img.shields.io/gemnasium/Jabher/gulp-todo.svg)](https://gemnasium.com/Jabher/gulp-todo)
-[![Build Status](http://img.shields.io/travis/Jabher/gulp-todo.svg)](https://travis-ci.org/Jabher/gulp-todo)
+[![NPM Version](http://img.shields.io/npm/v/gulp-todos.svg)](https://npmjs.org/package/gulp-todos)
+[![NPM Downloads](http://img.shields.io/npm/dm/gulp-todos.svg)](https://npmjs.org/package/gulp-todos)
+[![Dependencies](http://img.shields.io/gemnasium/Jabher/gulp-todos.svg)](https://gemnasium.com/Jabher/gulp-todos)
+[![Build Status](http://img.shields.io/travis/Jabher/gulp-todos.svg)](https://travis-ci.org/Jabher/gulp-todos)
 
 Parse all your files, and generate a todo.md
 
 ## Install
 
-Install with [npm](https://npmjs.org/package/gulp-every-todo)
+Install with [npm](https://npmjs.org/package/gulp-todos)
 
 ```
-npm install --save-dev gulp-every-todo
+npm install --save-dev gulp-todos
 ```
 
 ## Example
 
 ```js
 var gulp = require('gulp');
-var todo = require('gulp-todo');
+var todo = require('gulp-todos');
 
 gulp.task('default', function() {
     gulp.src('js/**/*.js')
